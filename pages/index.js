@@ -1,8 +1,15 @@
-import * as React from "react";
-import { MathComponent } from "mathjax-react";
-
-class Index extends React.Component {
-  render() {
-    return <MathComponent tex={String.raw`\int_0^1 x^2\ dx`} />;
-  }
+import MathJax from 'react-mathjax2'
+ 
+const tex = `f(x) = \\int_{-\\infty}^\\infty\\hat f(\\xi)\\,e^{2 \\pi i \\xi x}\\,d\\xi`
+ 
+module.exports = () => {
+    return (
+        <div>
+            <MathJax.Context input='tex'>
+                <div>
+                    This is an inline math formula: <MathJax.Node inline>{'a = b'}</MathJax.Node>
+                </div>
+            </MathJax.Context>
+        </div>
+    );
 }
