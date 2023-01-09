@@ -1,78 +1,198 @@
-import React, { useState } from "react";
+import Link from 'next/link';
+import Head from 'next/head';
+import { useState } from 'react';
+import { useEffect } from 'react';
 import { MathJax, MathJaxContext } from "better-react-mathjax";
 
+export default function PracticeEge1() {
+    
 const config = {
-  "fast-preview": {
-    disabled: true
-  },
-  tex2jax: {
-    inlineMath: [
-      ["$", "$"],
-      ["\\(", "\\)"]
-    ],
-    displayMath: [
-      ["$$", "$$"],
-      ["\\[", "\\]"]
-    ]
-  },
-  messageStyle: "none"
-};
+        "fast-preview": {
+          disabled: true
+        },
+        tex2jax: {
+          inlineMath: [
+            ["\\(", "\\)"]
+          ],
+          displayMath: [
+            ["$$", "$$"],
+            ["\\[", "\\]"]
+          ]
+        },
+        messageStyle: "none"
+  };
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [email_teach, setEmail_teach] = useState('')
+  const [message, setMessage] = useState('')
+  const [submitted, setSubmitted] = useState(false)
+  const questions = [
+    {
+        questionText: 'Решите уравнение \\((9x − 3)^2 = (6x + 3)^2\\). Если уравнение имеет более одного корня, в ответ запишите меньший из них.',
+        isText: true,
+        answerOptions: [
+            {answerText: '0'},
+        ]
+    }
+  ]
+  const [currentQuestion, setCurrentQuestion] = useState(0)
+  const [score, setScore] = useState(0)
+  const [input, setInput] = useState('')
+  const [showScore, setShowScore] = useState(false)
+  function handleAnswerOptionClick (isCorrect) {
+    if (isCorrect) {
+        setScore(score + 1)
+    }
 
-export default function App() {
-  const [num, setNum] = useState(10);
+    const nextQuestion = currentQuestion + 1
+
+    if (nextQuestion < questions.length) {
+        setCurrentQuestion(nextQuestion)
+    }
+    else {
+        setShowScore(true)
+        setMessage(score + 1)
+    }
+  } 
+
+  const refresh = () => {
+    setCurrentQuestion(0)
+    setScore(0)
+    setShowScore(false)
+  }
+  var textfor = ''
+  const textSubmit = (text, correct, e) => {
+    textfor = text.replace(/\,/g, '.')
+    textfor = textfor.trim()
+    if (textfor == correct) {
+        handleAnswerOptionClick(true)
+    }
+    else {
+            handleAnswerOptionClick(false)
+    }
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    console.log('Sending')
+
+    let data = {
+        name,
+        email,
+        message,
+        email_teach
+    }
+
+    fetch('/api/contact', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    }).then((res) => {
+        console.log('Response received')
+        if (res.status === 200) {
+            console.log('Response succeeded!')
+            setSubmitted(true) 
+            setName('1')
+            setEmail('2')
+            setMessage('3')
+            setEmail_teach('4')
+        }
+    })
+  }
 
   return (
+    <div>
     <MathJaxContext
       version={2}
       config={config}
       onStartup={(mathJax) => (mathJax.Hub.processSectionDelay = 0)}
     >
-      <h2>Optimal MathJax example with Latex</h2>
-      <i>
-        This example shows a personal favourite setting that performs well both
-        in terms of responsive updates as well as seamless dynamic typesetting.
-        As stated in the section on how to fight flashes of non-typeset content,
-        a subtle flickering can sometimes be seen with MathJax 3 when used in
-        Chrome and Safari. This configuration effectively removes this while it
-        at the same time results in a good experience with fast updates.
-        <br />
-        <br />
-        Note that this configuration has only been tested with Latex
-      </i>
-      <br />
-      <br />
-
-      <h3>Hiding updates</h3>
-      <p>
-        Most likely, the benefits of this optimal configuration will not be seen
-        below but make sure to try it out if you have problems with flickering
-        or slow response times. Since MathJax 2 is used, the example with{" "}
-        <tt>renderMode</tt> set to <tt>pre</tt> has been removed.
-        <br />
-        <br />
-        Current value used in this section: {num}
-      </p>
-      <ul>
-        <li>
-          <tt>hideUntilTypeset</tt> set to <tt>first</tt>:{" "}
-          <MathJax
-            hideUntilTypeset={"first"}
-            inline
-            dynamic
-          >{`An example is the equation $${num}x^4 = 100$`}</MathJax>
-        </li>
-        <li>
-          <tt>hideUntilTypeset</tt> set to <tt>every</tt>:{" "}
-          <MathJax
-            hideUntilTypeset={"first"}
-            inline
-            dynamic
-          >{`An example is the equation $${num}x^4 = 100$`}</MathJax>
-        </li>
-      </ul>
-      <button onClick={() => setNum((oldNum) => oldNum + 10)}>
-        Add 10 to value used
-      </button>
-    </MathJaxContext>
-  );
+    <Head>
+        <meta charSet="UTF-8"/>
+        <meta httpEquiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Квадратные Уравнения</title>
+    </Head>
+        <header className="header">
+            <nav className="header-nav">
+                <ul className="header-menu">
+                    <li className="header-menu-item"><Link href="/" className="header-menu-link">{'\\(\\sf{ax^2 + bx + c = 0}\\)'}</Link></li>
+                </ul>
+            </nav>
+        </header>
+        <main className="main">
+            <div className="content_main">
+                {
+                    showScore
+                        ?   <div className="section_score">
+                                <div>Правильных ответов {score} из {questions.length}</div>
+                                {}
+                                < form className="form" >
+                                    < label jsfor='name'>Фамилия, имя, класс</label>
+                                    < input type='text' onChange={(e)=>{setName(e.target.value)}} name='name' className="name label" />
+                                    <br />
+                                    < label jsfor='email'>Email</label>
+                                    < input type='email' onChange={(e)=>{setEmail(e.target.value)}} name='email' className="email label" />
+                                    <br />
+                                    < label jsfor='email_teach'>Email учителя</label>
+                                    < input type='email' onChange={(e)=>{setEmail_teach(e.target.value)}} name='email_teach' className="email_teach label" />
+                                    <br />
+                                    < input type='submit' onClick={(e)=>{handleSubmit(e)}}/>
+                                </form >
+                                <button className='refresh_ btn'
+                                    onClick={refresh}
+                                >Попробовать еще раз</button>
+                            </div>
+                        :
+                        questions[currentQuestion].isText
+                        ?
+                        <div className="quizz">
+                        <div className="question_section">
+                            <div className="question_count">
+                                <span>Вопрос {currentQuestion + 1}</span> /{questions.length}
+                            </div>
+                            <div className="question_text" jsfor="question_text">
+                                <MathJax
+                                    hideUntilTypeset={"first"}
+                                    inline
+                                    dynamic
+                                >{questions[currentQuestion].questionText}</MathJax>
+                            </div>
+                        </div>
+                        <div className="answer_section">
+                                < span jsfor='message'>Ответ</span>
+                                <br />             	
+                                <input type="text" name="text" onChange={(event) => setInput(event.target.value)}/>
+                                <br />
+                                < button type='submit' className='test_next'
+                                onClick={(e)=>{textSubmit(input, questions[currentQuestion].answerOptions[0].answerText, e)}}
+                                >Далее</button>
+                        </div>
+                            </div>
+                        :
+                        <div className="quizz">
+                        <div className="question_section">
+                            <div className="question_count">
+                                <span>Вопрос {currentQuestion + 1}</span> /{questions.length}
+                            </div>
+                            <MathJax><div className="question_text" id="question_text">{questions[currentQuestion].questionText}</div></MathJax>
+                        </div>
+                        <div className="answer_section">
+                            {questions[currentQuestion].answerOptions.map((item,key) => (
+                            <button key={key}
+                                onClick={() => handleAnswerOptionClick(item.isCorrect)}
+                            >{item.answerText}</button>
+                            )
+                            )}
+                        </div>
+                            </div>
+                }
+            </div>
+          </main>
+          </MathJaxContext>
+          </div>
+  )
 }
